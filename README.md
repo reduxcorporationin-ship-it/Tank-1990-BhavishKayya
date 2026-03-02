@@ -2,7 +2,7 @@
 ### Classic Battle City recreated using **Phaser 3 + TypeScript**
 
 <p align="center">
-  <img src="screenshots/gameplay.png" alt="Gameplay Screenshot" width="700"/>
+  <img src="https://bhavishkayya.space/game-project/gameplay.png" alt="Gameplay Screenshot" width="700"/>
 </p>
 
 <p align="center">
@@ -89,9 +89,13 @@ The game HUD displays:
 - Remaining Enemies
 
 <p align="center">
-  <img src="screenshots/hud.png" alt="HUD Screenshot" width="700"/>
+  <img src="https://bhavishkayya.space/game-project/hud_screenshot.png" alt="HUD Screenshot" width="700"/>
 </p>
 
 ---
 
 ## 🧱 Project Architecture
+
+<p align="center">
+  <img src="https://bhavishkayya.space/game-project/structure.png" alt="Project Structure" width="700"/>
+</p>
