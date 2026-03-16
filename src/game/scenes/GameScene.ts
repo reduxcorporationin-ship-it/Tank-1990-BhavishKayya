@@ -117,6 +117,8 @@ export default class GameScene extends Phaser.Scene {
 
   private sfxShoot?: Phaser.Sound.BaseSound;
   private sfxMoveLoop?: Phaser.Sound.BaseSound;
+  private sfxHitPlayer?: Phaser.Sound.BaseSound;
+  private sfxPowerUp?: Phaser.Sound.BaseSound;
 
   constructor() { super("GameScene"); }
 
@@ -229,6 +231,12 @@ export default class GameScene extends Phaser.Scene {
     }
     if (audioCache.exists("moving_tank")) {
       this.sfxMoveLoop = this.sound.add("moving_tank", { loop: true, volume: 0.35 });
+    }
+    if (audioCache.exists("hit_player")) {
+      this.sfxHitPlayer = this.sound.add("hit_player", { volume: 0.7 });
+    }
+    if (audioCache.exists("powerup")) {
+      this.sfxPowerUp = this.sound.add("powerup", { volume: 0.7 });
     }
 
     this.spawnPoints = this.buildSpawnPoints(map);
@@ -409,7 +417,7 @@ export default class GameScene extends Phaser.Scene {
       };
 
       btn.on("pointerdown", (p: Phaser.Input.Pointer) => {
-        if (!p.isPrimary && !p.isDown) return;
+        if (!p.isDown) return;
         setState(true);
       });
       btn.on("pointerup", () => setState(false));
@@ -468,58 +476,6 @@ export default class GameScene extends Phaser.Scene {
     this.sfxShoot?.play();
   }
 
-  private fireBulletAtAngle(pointer: Phaser.Input.Pointer) {
-    if (this.playerBulletActive || this.fireCooldown) return;
-
-    // Calculate angle from player to mouse position
-    const dx = pointer.worldX - this.player.x;
-    const dy = pointer.worldY - this.player.y;
-    const rawAngleRad = Math.atan2(dy, dx);
-    const rawAngleDeg = Phaser.Math.RadToDeg(rawAngleRad);
-
-    // Snap to the 4 tank directions so the tank never tilts diagonally
-    const cardinalAnglesDeg = [0, 90, 180, -90];
-    let closestDeg = cardinalAnglesDeg[0];
-    let minDiff = Infinity;
-    for (const a of cardinalAnglesDeg) {
-      const diff = Math.abs(Phaser.Math.Angle.WrapDegrees(rawAngleDeg - a));
-      if (diff < minDiff) {
-        minDiff = diff;
-        closestDeg = a;
-      }
-    }
-
-    const snappedRad = Phaser.Math.DegToRad(closestDeg);
-
-    // Rotate tank only to the nearest cardinal direction
-    this.player.setAngle(closestDeg + 90);
-
-    // Calculate bullet spawn position
-    const bx = this.player.x + Math.cos(snappedRad) * 16;
-    const by = this.player.y + Math.sin(snappedRad) * 16;
-
-    const bullet = this.physics.add.image(bx, by, "bullet") as Phaser.Physics.Arcade.Image;
-    bullet.setScale(0.12).setDepth(6).setRotation(snappedRad);
-    bullet.setData("isPlayerBullet", true);
-    bullet.setData("lifetime", 0);
-
-    const body = bullet.body as Phaser.Physics.Arcade.Body;
-    body.setAllowGravity(false);
-    body.setSize(8, 8, true);
-    body.setVelocity(
-      Math.cos(snappedRad) * this.activeBulletSpeed,
-      Math.sin(snappedRad) * this.activeBulletSpeed
-    );
-
-    this.bullets.add(bullet);
-    this.playerBulletActive = true;
-    this.fireCooldown = true;
-    this.time.delayedCall(280, () => { this.fireCooldown = false; });
-    this.createMuzzleFlash(snappedRad);
-    this.sfxShoot?.play();
-  }
-
-  
   private enemyShoot(enemy: Phaser.Physics.Arcade.Sprite) {
     if (!enemy.active) return;
     if (this.enemyFireCooldown.get(enemy)) return;
